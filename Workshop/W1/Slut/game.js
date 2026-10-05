@@ -46,14 +46,80 @@ class GameData {
 
 let oGameData = new GameData();
 window.addEventListener('load', function() {
+    //Nu är det ok att modifera DOM:en
 
-    //Här skriver vi kod!
-    console.log('load');
+    document.addEventListener('keydown', function( e ) {
+
+        if(e.key === 'b' || e.key === 'B') {
+
+            clearInterval(oGameData.timerId);
+
+            oGameData.timerId = setInterval(function() { //OBS om ni vill korta ner tiden mellan skapandet av spöken behöver ni använda setTimeout() och starta en ny varje gång.
+
+                let imgRef = document.createElement('img');
+
+                let top = oGameData.calculateGhostTop();
+                let left = oGameData.calculateGhostLeft();
+
+                imgRef.style.left = left + 'px';
+                imgRef.style.top = top + 'px';
+
+                imgRef.setAttribute('src', oGameData.imgSrc);
+                imgRef.setAttribute('alt', oGameData.imgAlt);
+
+                imgRef.style.width = oGameData.imgWidth + 'px';
+                imgRef.style.height = oGameData.imgHeight + 'px';
+                imgRef.style.position = 'absolute';
+
+                document.querySelector('#gameField').appendChild(imgRef);
+
+                oGameData.antalSpoken++;
+
+                imgRef.addEventListener('click', function( e ) {
+                    oGameData.antalKlickadSpoken++;
+                    this.remove();
+                });
+
+                //if(oGameData.antalSpoken % 2 === 0) {
+
+                    oGameData.milliseconds -= 100;
+                    oGameData.imgHeight -= 25;
+                    oGameData.imgWidth -= 50;
+
+                    if( oGameData.milliseconds === 0) { //Obs tänk på att tiden mellan de olika spökena är konstant! setInterval()!
+                        console.log('Game Over...');
+
+                        document.dispatchEvent(new KeyboardEvent('keydown', {'key' : 'e'}));
+                    }
+
+                //}
+
+
+            }, oGameData.milliseconds);
+
+        }
+
+        if(e.key === 'e' || e.key === 'E') {
+            clearInterval(oGameData.timerId);
+
+            alert('Antalet spöken var ' + oGameData.antalSpoken + ' och du fångade ' + oGameData.antalKlickadSpoken);
+
+            oGameData.prepareForNewGame();
+            oGameData.removeGhosts();
+
+        }
+
+
+    });
+
 
 });
 
+
+
 /*
-    1. Instansiera ett objekt ur GameData och kalla objektet oGameData
+    1. Lägg till attributet miliseconds i GameData och instansiera 
+        sedan ett objekt ur GameData oGameData
     2. Lyssnare för load
     3. Lyssnare för keydown b eller B
     4. Skapa en timer 
@@ -64,4 +130,5 @@ window.addEventListener('load', function() {
     9. Lyssnare click på img-elementet
     10. Styrande variabler
     11. Game Over
+    12. e eller E
 */
