@@ -3,11 +3,13 @@ import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";
 
 function UIRoot(){
+
+    let colors = {r:255, g:15, b:30};
    
     return (
         <>
-            <Header/>
-            <Main/>
+            <Header />
+            <Main {...colors}/>
             <Footer/>
         
         </>
