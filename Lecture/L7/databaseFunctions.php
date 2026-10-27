@@ -1,22 +1,80 @@
 <?php
 
+    function justToShow($indata) {
+        echo("<pre>" . PHP_EOL);
+        print_r($inData);
+        echo("</pre>" . PHP_EOL);
+    }
     function connectToDatabase() {
 
         try {
            
+            $dsn = "mysql:host=localhost:3306;dbname=bilar;charset=utf8;";
+            $username = "mysqluser";
+            $password= "mysqlpassword";
+
             $dbhsOptions = array(
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             );
 
+            $dbh = new PDO($dsn, $username, $password, $dbhsOptions);
+
+            return $dbh;
+
+
         }catch(PDOException $e) {
-    
+            throw $e;
         }
     }
 
     function listCarsAsForms($dbh) {
 
         //SELECT
+    
+        $sql = "SELECT * FROM cars ORDER BY id DESC;";
+        $stmt = $dbh->prepare($sql);
+        $stmt->execute();
+
+        /*
+        $dummy = $stmt->fetchAll();
+
+        echo("<pre>");
+        print_r($dummy);
+        echo("</pre>");
+        */
+        
+
+        while( $row = $stmt->fetch() ) {
+
+                $farg = $row["farg"];
+                $fabrikat = $row["fabrikat"];
+                $modell = $row["modell"];
+                $id = $row["id"];
+                $regnr = $row["regnr"];
+                $mil = $row["mil"];
+
+
+                ?>
+
+                <div style='background-color: <?php echo( $farg ); ?>'>
+                    <form action='<?php echo( $_SERVER["PHP_SELF"] ); ?>' method='post'>
+                
+                        <p>Fabrikat: <?php echo( $fabrikat ); ?></p>
+                        <p>Modell: <?php echo( $modell ) ?></p>
+                        <p>Regnr: <?php echo( $regnr ) ?></p>
+                        <p>Färg: <?php echo( $farg ) ?></p>
+                        <p>Mil: <?php echo( $mil ) ?></p>
+                        <input type='hidden' name='hidId' value='<?php  echo( $id ); ?>'>
+                        <input type='submit' name='btnEdit' value='Edit'>
+                        <input type='submit' name='btnDelete' value='Delete'>
+
+                    </form>
+                </div>
+
+                <?php
+            
+            }
 
         try {
 
@@ -31,7 +89,6 @@
 
     function listCarsAsLinks($dbh) {
         //SELECT
-
          try {
 
         }catch(PDOException $e) {
@@ -44,8 +101,18 @@
 
     function deleteCar($dbh, $id) {
         //DELETE
+        echo("DELETE med id: $id");
 
-         try {
+        try {
+
+            $sql = "DELETE FROM cars WHERE id = :id;";
+
+            $stmt = $dbh->prepare($sql);
+
+            $stmt->bindValue(":id", $id);
+
+            $stmt->execute();
+
 
         }catch(PDOException $e) {
             throw $e;
@@ -59,6 +126,20 @@
         //UPDATE
          try {
 
+            $sql = "UPDATE cars set fabrikat=:fabrikat, modell=:modell, 
+                regnr=:regnr, farg=:farg, mil=:mil WHERE id = :id;";
+
+            $stmt = $dbh->prepare($sql);
+
+            $stmt->bindValue(":id", $id);
+            $stmt->bindValue(":fabrikat", $fabrikat);
+            $stmt->bindValue(":modell", $modell);
+            $stmt->bindValue(":regnr", $regnr);
+            $stmt->bindValue(":farg", $farg);
+            $stmt->bindValue(":mil", $mil);
+
+            $stmt->execute();
+
         }catch(PDOException $e) {
             throw $e;
 
@@ -69,7 +150,21 @@
 
     function insertCar($dbh, $fabrikat, $modell, $regnr, $farg, $mil) {
         //INSERT
-         try {
+
+        try {
+
+            $sql = "INSERT INTO cars(fabrikat, modell, regnr, farg, mil) 
+                VALUES(:fabrikat, :modell, :regnr, :farg, :mil);";
+
+            $stmt = $dbh->prepare($sql);
+
+            $stmt->bindValue(":fabrikat", $fabrikat);
+            $stmt->bindValue(":modell", $modell);
+            $stmt->bindValue(":regnr", $regnr);
+            $stmt->bindValue(":farg", $farg);
+            $stmt->bindValue(":mil", $mil);
+
+            $stmt->execute();
 
         }catch(PDOException $e) {
             throw $e;
@@ -82,6 +177,12 @@
     function selectCar($dbh, $id) {
         //SELECT
          try {
+
+            $sql = "SELECT * FROM cars WHERE id=:id;";
+            $stmt = $dbh->prepare($sql);
+            $stmt->bindValue(":id", $id);
+            $stmt->execute();
+            createForm($stmt->fetch());
 
         }catch(PDOException $e) {
             throw $e;
