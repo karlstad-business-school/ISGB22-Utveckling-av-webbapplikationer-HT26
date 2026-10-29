@@ -1,11 +1,46 @@
 <?php
 
-    $antal = 0;
-    $stringToEcho = "";
+$summa = 0;
+$antal = 0;
+$stringToEcho = "";
 
-    if( isset( $_POST["skicka"] ) ) {
+if (isset($_POST["skicka"])) {
+    session_start();
 
+    session_regenerate_id();
+
+    if (isset($_SESSION["antal"])) {
+        $antal = $_SESSION["antal"];
     }
+
+    if (isset($_SESSION["summa"])) {
+        $summa = $_SESSION["summa"];
+    }
+
+    define("IMG", "<img src='http://localhost/ISGB22_2026/L8/bilder/");
+    for ($i = 0; $i < 6; $i++) {
+        $slumptal = rand(1, 6);
+        $stringToEcho = $stringToEcho . IMG . $slumptal . ".png' alt='" . $slumptal . "' />";
+        $summa += $slumptal;
+    }
+
+
+    $antal++;
+
+    $_SESSION["antal"] = $antal;
+    $_SESSION["summa"] = $summa;
+   
+
+    //$stringToEcho = $stringToEcho . "<h2> Du har klickat på knappen " . $antal . " gånger!</h2>";
+    if ($summa >= 100) {
+        $stringToEcho = $stringToEcho ."<h2> Grattis du har nått 100! Antal omgångar det tog: " . $antal . "</h2>";
+    } else {
+         $stringToEcho = $stringToEcho ."<h2> Summa: " . $summa . " Antal omgångar: " . $antal . "</h2>";
+    }
+    //Hjälpfunktioner
+   // echo(session_save_path());
+
+}
 
     if(isset($_POST["rensa"])) {
 

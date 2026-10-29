@@ -24,7 +24,7 @@
         <main>    
             <?php
 
-                define("IMG", "<img src='https://openclipart.org/download/2821");
+                define("IMG", "<img src='http://localhost/ISGB22_2026/L8/bilder/");
 
                 $summa = 0;
                 $antal = 0;
@@ -32,6 +32,24 @@
                 if( isset( $_GET["skicka"] ) ) {
 
                     //Här skriver du din kod!
+                    $summa = $_GET["summa"];
+
+                    for($i=0;$i<6;$i++) {
+                        $slumptal = rand(1,6);
+                        echo(IMG . $slumptal . ".png' alt='" .$slumptal."' />");
+                        //$summa = $summa + $slumptal;
+                        $summa += $slumptal;
+                    }
+
+                    $antal = $_GET["antal"];
+                    $antal++;
+
+                    if($summa >= 100) {
+                        echo("<h2> Grattis du har nått 100! Antal omgångar det tog: " .$antal. "</h2>" );
+                    } else {
+                        echo("<h2> Summa: ".$summa." Antal omgångar: " .$antal. "</h2>" );
+                    }
+
 
                 }
 
