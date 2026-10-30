@@ -1,13 +1,106 @@
 <?php
 
-//Starta en session
+//Startar en session
 session_start();
 $titel = "Logga in";
 $mystr = "Ej inloggad";
 $inloggad = "false";
 
+//Kontrollerar om formuläret har skickats 
+if (isset($_POST["btnLogin"])) {
+   
+    try {
 
+        //Konfigurerar och öppnar en databasanslutning med PDO till databasen tuppenbilar
+        $dataSourceName = "mysql:" . "host=localhost;" . "dbname=bilar;" . "charset=utf8";
+
+        $userName = "root";
+        $passWord = "";
+
+        $dbhsOptions = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        );
+
+        $dbh = new PDO($dataSourceName, $userName, $passWord, $dbhsOptions);
+
+        //Hämtar användarnamn och lösenord från formuläret via POST
+        $username = $_POST["txtUsername"];
+        $password = $_POST["txtPassword"];
+
+        // Skapar en SQL-fråga med platshållare för att undvika SQL-injektion
+        $sql = "SELECT * FROM user WHERE username=:anv AND password=:losen";
+
+        //Förbereder och kör SQL-frågan med användarens inmatade värden
+        $stmt = $dbh->prepare($sql);
+        $stmt->bindValue(":anv", $username);
+        $stmt->bindValue(":losen", $password);
+        $stmt->execute();
+
+        //Kontrollerar om frågeresultatet ($stmt) innehåller några rader (om användaren finns i databasen) 
+        if($stmt->rowCount() > 0) {
+            echo "Yey korrekt!!";
+            $titel = "inloggad";
+            $inloggad = "true";
+            //Sparar inloggningsstatus på servern med sessionsvariabeln så att användaren förblir inloggad mellan sidladdningar
+            $_SESSION["inloggad"] = "true";
+        } else { 
+            echo "Fel inlogg..";
+        }
+
+
+    } catch (Exception $e) {
+        echo "Något sprängdes..";
+        echo"". $e->getMessage() ."";
+
+    }
+}
+
+//Kontrollerar om användaren är inloggad genom den tidigare sparade sessionsvariabeln
+if(isset($_SESSION["inloggad"])) { 
  
+     $dataSourceName = "mysql:" . "host=localhost;" . "dbname=bilar;" . "charset=utf8";
+
+        $userName = "root";
+        $passWord = "";
+
+        $dbhsOptions = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        );
+
+        $dbh = new PDO($dataSourceName, $userName, $passWord, $dbhsOptions); 
+
+       $mystr = getCars($dbh); 
+       $inloggad = "true";
+}
+
+//Funktion som hämtar alla bilar från databasen
+function getCars($dbh) {
+
+    try {
+
+    // Hämta alla bilar och sortera efter märke/fabrikant
+    $sql = "SELECT * FROM bilar ORDER BY marke";
+
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute();
+
+    $str = "<h2>Vår fina bilar som vi älskar!</h2>";
+
+    while($row = $stmt->fetch()) {
+        $str .= "<p>Bilmärke: " . $row["marke"] . "<br>";
+        $str .= "Modell: " . $row["modell"] . "<br>";
+        $str .= "Regnr: " . $row["regnr"] . "</p>";
+    }
+
+    return $str;
+
+    } catch(Exception $e) {
+        echo "";
+        echo "". $e->getMessage() ."";
+    }
+}
 
 ?>
 
@@ -80,7 +173,7 @@ $inloggad = "false";
         <main><?php echo ($mystr) ?></main>
     </div>
     <?php
-    /* Kollar om användaren är inloggad, om inte visa login-formulär. */
+    /* Kontrollerar om användaren är inloggad, om inte visa login-formulär. */
     if ($inloggad != "true") {
         echo "<script>";
         echo "$('#login-modal').modal('show');";
